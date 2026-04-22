@@ -1,0 +1,56 @@
+countryCode,region
+USA,North America
+CAN,North America
+VIR,North America
+MEX,Latin America & Caribbean
+BRA,Latin America & Caribbean
+ARG,Latin America & Caribbean
+CHL,Latin America & Caribbean
+COL,Latin America & Caribbean
+PER,Latin America & Caribbean
+
+GBR,Europe & Central Asia
+DEU,Europe & Central Asia
+FRA,Europe & Central Asia
+ITA,Europe & Central Asia
+ESP,Europe & Central Asia
+NLD,Europe & Central Asia
+SWE,Europe & Central Asia
+NOR,Europe & Central Asia
+POL,Europe & Central Asia
+UKR,Europe & Central Asia
+
+IND,South Asia
+PAK,South Asia
+BGD,South Asia
+LKA,South Asia
+NPL,South Asia
+
+CHN,East Asia & Pacific
+JPN,East Asia & Pacific
+KOR,East Asia & Pacific
+IDN,East Asia & Pacific
+THA,East Asia & Pacific
+VNM,East Asia & Pacific
+PHL,East Asia & Pacific
+MYS,East Asia & Pacific
+
+SAU,Middle East & North Africa
+ARE,Middle East & North Africa
+IRN,Middle East & North Africa
+IRQ,Middle East & North Africa
+EGY,Middle East & North Africa
+MAR,Middle East & North Africa
+
+NGA,Sub-Saharan Africa
+ZAF,Sub-Saharan Africa
+KEN,Sub-Saharan Africa
+ETH,Sub-Saharan Africa
+GHA,Sub-Saharan Africa
+TZA,Sub-Saharan Africa
+UGA,Sub-Saharan Africa
+ZMB,Sub-Saharan Africa
+ZWE,Sub-Saharan Africa
+
+AUS,East Asia & Pacific
+NZL,East Asia & Pacific
