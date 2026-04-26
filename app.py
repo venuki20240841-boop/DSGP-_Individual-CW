@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+COLOR_PRIMARY = "#2E86AB"
+COLOR_SECONDARY = "#F18F01"
+COLOR_ALERT = "#C0392B"
 
 # Page config
 st.set_page_config(page_title="Global Electricity Access Dashboard",
@@ -46,19 +49,19 @@ col3.metric("⚠ Countries Below 60%", countries_low)
 st.divider()
 
 # Global trend over time
-st.subheader("📈 Global Electricity Access Trend")
-
-trend = df.groupby("year")["electricityAccess"].mean().reset_index()
-
 fig_trend = px.line(
     trend,
     x="year",
     y="electricityAccess",
     markers=True,
-    title="Average Global Electricity Access Over Time"
+    title="Average Global Electricity Access Over Time",
 )
 
-st.plotly_chart(fig_trend, use_container_width=True)
+fig_trend.update_traces(line=dict(color=COLOR_PRIMARY, width=3))
+fig_trend.update_layout(
+    title_x=0.3,
+    yaxis_title="Access (%)",
+    xaxis_title="Year")
 
 # Region comparison
 st.subheader("🌎 Electricity Access by Region")
