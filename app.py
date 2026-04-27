@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+
 COLOR_PRIMARY = "#2E86AB"
 COLOR_SECONDARY = "#F18F01"
 COLOR_ALERT = "#C0392B"
@@ -43,12 +44,13 @@ col1, col2, col3, col4 = st.columns(4)
 global_avg = filtered_df["electricityAccess"].mean()
 countries_100 = filtered_df[filtered_df["electricityAccess"] >= 99].shape[0]
 countries_low = filtered_df[filtered_df["electricityAccess"] < 60].shape[0]
-worst_row     = filtered_df.nsmallest(1, "electricityAccess")
+worst_row = filtered_df.nsmallest(1, "electricityAccess")
 
 col1.metric("🌍 Global Avg Access", f"{global_avg:.1f}%")
 col2.metric("⚡ Countries with 100% Access", countries_100)
 col3.metric("⚠ Countries Below 60%", countries_low)
-col4.metric("🔻 Worst Performing Country",worst_row["countryName"].values[0],
+col4.metric("🔻 Worst Performing Country",
+    worst_row["countryName"].values[0],
     f"{worst_row['electricityAccess'].values[0]:.1f}%")
 
 st.divider()
@@ -183,23 +185,38 @@ fig_map = px.choropleth(
 
 st.plotly_chart(fig_map, use_container_width=True)
 
-
-# Country trend analysis
+# Country Trend Analysis 
 st.subheader("📊 Country Trend Analysis")
 
-country = st.selectbox("Select Country", df["countryName"].unique())
+country = st.selectbox("Select Country", sorted(df["countryName"].unique()))
 
 country_df = df[df["countryName"] == country]
+last_10_years = sorted(country_df["year"].unique())[-10:]
+country_df_filtered = country_df[country_df["year"].isin(last_10_years)]
 
-fig_country = px.line(
-    country_df,
+fig_country = px.bar(
+    country_df_filtered,
     x="year",
     y="electricityAccess",
-    markers=True,
-    title=f"Electricity Access Trend - {country}")
-
+    text="electricityAccess",
+    title=f"Electricity Access (Last 10 Years) — {country}",
+    labels={"electricityAccess": "Access (%)", "year": "Year"},
+    color="electricityAccess",
+    color_continuous_scale=["#e05c5c", "#f0c040", COLOR_GOOD],
+    range_color=[0, 100]
+)
+fig_country.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+fig_country.update_layout(
+    title_x=0.3,
+    xaxis=dict(tickmode='linear'),
+    yaxis=dict(range=[0, 110]),
+    coloraxis_showscale=False
+)
 st.plotly_chart(fig_country, use_container_width=True)
 
+st.divider()
+
+#Country Deep Dive
 st.subheader("🔍 Country Deep Dive")
 
 country = st.selectbox("Select a Country", sorted(df["countryName"].unique()))
@@ -223,7 +240,7 @@ fig_country = px.area(
     labels={"electricityAccess": "Access (%)", "year": "Year"}
 )
 fig_country.update_traces(
-    line=dict(color=COLOR_PRIMARY, width=3),
+    line=dict(color=COLOR_SECONDARY, width=3),
     fillcolor="rgba(46,134,171,0.15)"
 )
 fig_country.update_layout(
@@ -238,7 +255,8 @@ st.divider()
 st.subheader("📂 Dataset Preview")
 st.dataframe(df.head(50))
 
-
-# ── Footer ─────────────────────────────────────────────────────────────────────
+#Footer - Dataset source
 st.markdown("---")
 st.caption("📊 Data: World Bank World Development Indicators | Indicator: WB_WDI_EG_ELC_ACCS_ZS | Years: 2000–2023")
+
+
