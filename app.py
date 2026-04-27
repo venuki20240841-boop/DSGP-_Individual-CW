@@ -6,7 +6,6 @@ COLOR_SECONDARY = "#F18F01"
 COLOR_ALERT = "#C0392B"
 COLOR_GOOD      = "#50c878"
 
-# Page config
 st.set_page_config(page_title="Global Electricity Access Dashboard",page_icon="⚡",
                    layout="wide")
 
@@ -116,35 +115,57 @@ st.plotly_chart(fig_region, use_container_width=True)
 
 st.divider()
 
-# Top countries
+# Top countries and Bottom countries
 st.subheader("🏆 Top Countries with Highest Access")
+st.subheader(f"📊 Country Rankings ({selected_year})")
 
-top_countries = filtered_df.sort_values("electricityAccess", ascending=False).head(10)
+col_left, col_right = st.columns(2)
 
-fig_top = px.bar(
-    top_countries,
-    x="electricityAccess",
-    y="countryName",
-    orientation="h",
-    title="Top 10 Countries (Electricity Access)"
-)
+with col_left:
+    st.markdown("**🏆 Top 10 - Developing Regions**")
+    developing_regions = ["South Asia", "Sub-Saharan Africa", "Middle East & North Africa"]
+    top_countries = filtered_df[filtered_df["region"].isin(developing_regions)] \
+        .sort_values("electricityAccess", ascending=False).head(10)
 
-st.plotly_chart(fig_top, use_container_width=True)
+    fig_top = px.bar(
+        top_countries,
+        x="electricityAccess",
+        y="countryName",
+        orientation="h",
+        color="electricityAccess",
+        color_continuous_scale=["#e05c5c", "#f0c040", COLOR_GOOD],
+        range_color=[0, 100],
+        labels={"electricityAccess": "Access (%)", "countryName": ""}
+    )
+    fig_top.update_layout(
+        xaxis=dict(range=[0, 105]),
+        coloraxis_showscale=False,
+        margin=dict(l=0, r=0, t=10, b=0)
+    )
+    st.plotly_chart(fig_top, use_container_width=True)
 
-# Bottom countries
-st.subheader("⚠ Countries with Lowest Access")
+with col_right:
+    st.markdown("**⚠️ Bottom 10 - Lowest Access**")
+    bottom_countries = filtered_df.sort_values("electricityAccess").head(10)
 
-bottom_countries = filtered_df.sort_values("electricityAccess").head(10)
+    fig_bottom = px.bar(
+        bottom_countries,
+        x="electricityAccess",
+        y="countryName",
+        orientation="h",
+        color="electricityAccess",
+        color_continuous_scale=["#C0392B", "#F18F01", COLOR_GOOD],
+        range_color=[0, 60],
+        labels={"electricityAccess": "Access (%)", "countryName": ""}
+    )
+    fig_bottom.update_layout(
+        xaxis=dict(range=[0, 105]),
+        coloraxis_showscale=False,
+        margin=dict(l=0, r=0, t=10, b=0)
+    )
+    st.plotly_chart(fig_bottom, use_container_width=True)
 
-fig_bottom = px.bar(
-    bottom_countries,
-    x="electricityAccess",
-    y="countryName",
-    orientation="h",
-    title="Bottom 10 Countries"
-)
-
-st.plotly_chart(fig_bottom, use_container_width=True)
+st.divider()
 
 # Map visualization
 st.subheader("🗺 Global Electricity Access Map")
@@ -162,6 +183,7 @@ fig_map = px.choropleth(
 
 st.plotly_chart(fig_map, use_container_width=True)
 
+
 # Country trend analysis
 st.subheader("📊 Country Trend Analysis")
 
@@ -174,53 +196,49 @@ fig_country = px.line(
     x="year",
     y="electricityAccess",
     markers=True,
-    title=f"Electricity Access Trend - {country}"
-)
+    title=f"Electricity Access Trend - {country}")
 
 st.plotly_chart(fig_country, use_container_width=True)
+
+st.subheader("🔍 Country Deep Dive")
+
+country = st.selectbox("Select a Country", sorted(df["countryName"].unique()))
+country_df = df[df["countryName"] == country]
+
+first_val = country_df.nsmallest(1, "year")["electricityAccess"].values[0]
+last_val  = country_df.nlargest(1,  "year")["electricityAccess"].values[0]
+change    = last_val - first_val
+
+c1, c2, c3 = st.columns(3)
+c1.metric("📅 Access in 2000", f"{first_val:.1f}%")
+c2.metric("📅 Access in 2023", f"{last_val:.1f}%")
+c3.metric("📈 Total Change",   f"{change:+.1f}%")
+
+fig_country = px.area(
+    country_df,
+    x="year",
+    y="electricityAccess",
+    markers=True,
+    title=f"Electricity Access Trend — {country}",
+    labels={"electricityAccess": "Access (%)", "year": "Year"}
+)
+fig_country.update_traces(
+    line=dict(color=COLOR_PRIMARY, width=3),
+    fillcolor="rgba(46,134,171,0.15)"
+)
+fig_country.update_layout(
+    title_x=0.3,
+    yaxis=dict(range=[0, 105])
+)
+st.plotly_chart(fig_country, use_container_width=True)
+
+st.divider()
 
 # Dataset preview
 st.subheader("📂 Dataset Preview")
 st.dataframe(df.head(50))
 
-interesting_regions = ["South Asia", "Sub-Saharan Africa", "Middle East & North Africa", 
-                       "Latin America & Caribbean", "East Asia & Pacific"]
 
-region_avg = df[df["region"].isin(interesting_regions)].groupby(
-    ["year", "region"])["electricityAccess"].mean().reset_index()
-
-fig_region = px.line(
-    region_avg,
-    x="year",
-    y="electricityAccess",
-    color="region",
-    title="Regional Electricity Access Trends"
-)
-fig_region.update_layout(
-    title_x=0.3,
-    yaxis_title="Access (%)",
-    xaxis_title="Year",
-    legend_title="Region",
-    yaxis=dict(range=[0, 105])
-)
-st.plotly_chart(fig_region, use_container_width=True)
-# Exclude countries with 100% to make it more interesting
-developing_regions = ["South Asia", "Sub-Saharan Africa", "Middle East & North Africa"]
-top_countries = filtered_df[filtered_df["region"].isin(developing_regions)]\
-    .sort_values("electricityAccess", ascending=False).head(10)
-
-fig_top = px.bar(
-    top_countries,
-    x="electricityAccess",
-    y="countryName",
-    orientation="h",
-    color="electricityAccess",
-    color_continuous_scale=["#e05c5c", "#f0c040", "#50c878"],
-    range_color=[0, 100],
-    title="Top 10 Countries by Electricity Access (Developing Regions)"
-)
-fig_top.update_layout(
-    xaxis=dict(range=[0, 105]),
-    coloraxis_showscale=False
-)
-st.plotly_chart(fig_top, use_container_width=True)
+# ── Footer ─────────────────────────────────────────────────────────────────────
+st.markdown("---")
+st.caption("📊 Data: World Bank World Development Indicators | Indicator: WB_WDI_EG_ELC_ACCS_ZS | Years: 2000–2023")
